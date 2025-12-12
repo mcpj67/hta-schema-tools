@@ -1,0 +1,717 @@
+{
+  "schema_version": "0.1.0",
+  "model_metadata": {
+    "model_id": "550e8400-e29b-41d4-a716-446655440000",
+    "model_name": "Stroke Thrombolysis vs Standard Care",
+    "model_type": "decision_tree",
+    "created_date": "2024-12-12T10:00:00Z",
+    "modified_date": "2024-12-12T14:30:00Z",
+    "author": {
+      "name": "Dr. Example Researcher",
+      "affiliation": "University Medical Center",
+      "email": "researcher@example.ac.uk",
+      "orcid": "0000-0002-1234-5678"
+    },
+    "description": "Simple decision tree comparing IV thrombolysis with alteplase versus standard care for acute ischemic stroke patients presenting within 4.5 hours of symptom onset. Outcomes stratified by modified Rankin Scale (mRS) at 90 days.",
+    "version": "1.0",
+    "clinical_area": "Acute Ischemic Stroke",
+    "target_population": "Adults with acute ischemic stroke presenting within 4.5 hours of symptom onset, no contraindications to thrombolysis",
+    "comparators": [
+      "IV thrombolysis (alteplase)",
+      "Standard care (no thrombolysis)"
+    ],
+    "setting": "UK NHS",
+    "currency": "GBP",
+    "currency_year": 2024,
+    "keywords": [
+      "stroke",
+      "thrombolysis",
+      "alteplase",
+      "cost-effectiveness",
+      "acute ischemic stroke"
+    ],
+    "references": [
+      {
+        "citation": "The National Institute of Neurological Disorders and Stroke rt-PA Stroke Study Group. Tissue plasminogen activator for acute ischemic stroke. N Engl J Med. 1995;333(24):1581-1587.",
+        "doi": "10.1056/NEJM199512143332401",
+        "pmid": "7477192"
+      }
+    ]
+  },
+  "model_structure": {
+    "root_node": "decision_treatment",
+    "nodes": {
+      "decision_treatment": {
+        "node_id": "decision_treatment",
+        "node_type": "decision",
+        "label": "Treatment Decision",
+        "description": "Initial choice between thrombolysis and standard care",
+        "branches": [
+          {
+            "branch_id": "branch_thrombolysis",
+            "label": "IV Thrombolysis",
+            "target_node": "chance_thrombolysis_outcome",
+            "initial_cost": {
+              "parameter_ref": "thrombolysis_drug_cost"
+            }
+          },
+          {
+            "branch_id": "branch_standard",
+            "label": "Standard Care",
+            "target_node": "chance_standard_outcome",
+            "initial_cost": {
+              "parameter_ref": "standard_care_cost"
+            }
+          }
+        ]
+      },
+      "chance_thrombolysis_outcome": {
+        "node_id": "chance_thrombolysis_outcome",
+        "node_type": "chance",
+        "label": "Outcome with Thrombolysis",
+        "description": "Distribution of mRS outcomes at 90 days with thrombolysis",
+        "branches": [
+          {
+            "branch_id": "throm_mrs_0_1",
+            "label": "mRS 0-1 (Independent)",
+            "probability": {
+              "parameter_ref": "prob_throm_mrs_0_1"
+            },
+            "target_node": "outcome_mrs_0_1"
+          },
+          {
+            "branch_id": "throm_mrs_2_3",
+            "label": "mRS 2-3 (Dependent)",
+            "probability": {
+              "parameter_ref": "prob_throm_mrs_2_3"
+            },
+            "target_node": "outcome_mrs_2_3"
+          },
+          {
+            "branch_id": "throm_mrs_4_5",
+            "label": "mRS 4-5 (Severe disability)",
+            "probability": {
+              "parameter_ref": "prob_throm_mrs_4_5"
+            },
+            "target_node": "outcome_mrs_4_5"
+          },
+          {
+            "branch_id": "throm_death",
+            "label": "Death (mRS 6)",
+            "probability": {
+              "parameter_ref": "prob_throm_death"
+            },
+            "target_node": "outcome_death"
+          }
+        ]
+      },
+      "chance_standard_outcome": {
+        "node_id": "chance_standard_outcome",
+        "node_type": "chance",
+        "label": "Outcome with Standard Care",
+        "description": "Distribution of mRS outcomes at 90 days with standard care",
+        "branches": [
+          {
+            "branch_id": "std_mrs_0_1",
+            "label": "mRS 0-1 (Independent)",
+            "probability": {
+              "parameter_ref": "prob_std_mrs_0_1"
+            },
+            "target_node": "outcome_mrs_0_1"
+          },
+          {
+            "branch_id": "std_mrs_2_3",
+            "label": "mRS 2-3 (Dependent)",
+            "probability": {
+              "parameter_ref": "prob_std_mrs_2_3"
+            },
+            "target_node": "outcome_mrs_2_3"
+          },
+          {
+            "branch_id": "std_mrs_4_5",
+            "label": "mRS 4-5 (Severe disability)",
+            "probability": {
+              "parameter_ref": "prob_std_mrs_4_5"
+            },
+            "target_node": "outcome_mrs_4_5"
+          },
+          {
+            "branch_id": "std_death",
+            "label": "Death (mRS 6)",
+            "probability": {
+              "parameter_ref": "prob_std_death"
+            },
+            "target_node": "outcome_death"
+          }
+        ]
+      },
+      "outcome_mrs_0_1": {
+        "node_id": "outcome_mrs_0_1",
+        "node_type": "terminal",
+        "label": "Independent Living (mRS 0-1)",
+        "description": "Patient returns to independent living with no or minimal symptoms",
+        "outcomes": {
+          "costs": [
+            {
+              "category": "acute_care",
+              "value": {
+                "parameter_ref": "acute_cost_mrs_0_1"
+              },
+              "timing": "immediate"
+            },
+            {
+              "category": "annual_care",
+              "value": {
+                "parameter_ref": "annual_cost_mrs_0_1"
+              },
+              "timing": "annual",
+              "duration_years": {
+                "parameter_ref": "time_horizon"
+              }
+            }
+          ],
+          "utilities": [
+            {
+              "value": {
+                "parameter_ref": "utility_mrs_0_1"
+              },
+              "timing": "annual",
+              "duration_years": {
+                "parameter_ref": "time_horizon"
+              }
+            }
+          ],
+          "life_years": {
+            "parameter_ref": "life_expectancy_mrs_0_1"
+          }
+        }
+      },
+      "outcome_mrs_2_3": {
+        "node_id": "outcome_mrs_2_3",
+        "node_type": "terminal",
+        "label": "Dependent Living (mRS 2-3)",
+        "description": "Patient requires some assistance with daily activities",
+        "outcomes": {
+          "costs": [
+            {
+              "category": "acute_care",
+              "value": {
+                "parameter_ref": "acute_cost_mrs_2_3"
+              },
+              "timing": "immediate"
+            },
+            {
+              "category": "annual_care",
+              "value": {
+                "parameter_ref": "annual_cost_mrs_2_3"
+              },
+              "timing": "annual",
+              "duration_years": {
+                "parameter_ref": "time_horizon"
+              }
+            }
+          ],
+          "utilities": [
+            {
+              "value": {
+                "parameter_ref": "utility_mrs_2_3"
+              },
+              "timing": "annual",
+              "duration_years": {
+                "parameter_ref": "time_horizon"
+              }
+            }
+          ],
+          "life_years": {
+            "parameter_ref": "life_expectancy_mrs_2_3"
+          }
+        }
+      },
+      "outcome_mrs_4_5": {
+        "node_id": "outcome_mrs_4_5",
+        "node_type": "terminal",
+        "label": "Severe Disability (mRS 4-5)",
+        "description": "Patient requires significant assistance or is bedridden",
+        "outcomes": {
+          "costs": [
+            {
+              "category": "acute_care",
+              "value": {
+                "parameter_ref": "acute_cost_mrs_4_5"
+              },
+              "timing": "immediate"
+            },
+            {
+              "category": "annual_care",
+              "value": {
+                "parameter_ref": "annual_cost_mrs_4_5"
+              },
+              "timing": "annual",
+              "duration_years": {
+                "parameter_ref": "time_horizon"
+              }
+            }
+          ],
+          "utilities": [
+            {
+              "value": {
+                "parameter_ref": "utility_mrs_4_5"
+              },
+              "timing": "annual",
+              "duration_years": {
+                "parameter_ref": "time_horizon"
+              }
+            }
+          ],
+          "life_years": {
+            "parameter_ref": "life_expectancy_mrs_4_5"
+          }
+        }
+      },
+      "outcome_death": {
+        "node_id": "outcome_death",
+        "node_type": "terminal",
+        "label": "Death (mRS 6)",
+        "description": "Patient dies within 90 days",
+        "outcomes": {
+          "costs": [
+            {
+              "category": "acute_care",
+              "value": {
+                "parameter_ref": "acute_cost_death"
+              },
+              "timing": "immediate"
+            }
+          ],
+          "utilities": [
+            {
+              "value": {
+                "parameter_ref": "utility_death"
+              },
+              "timing": "immediate"
+            }
+          ],
+          "life_years": {
+            "parameter_ref": "life_expectancy_death"
+          }
+        }
+      }
+    }
+  },
+  "parameters": {
+    "thrombolysis_drug_cost": {
+      "name": "Thrombolysis Drug Cost",
+      "description": "Cost of alteplase including administration",
+      "type": "cost",
+      "base_value": 450.0,
+      "distribution": {
+        "family": "gamma",
+        "parameters": {
+          "shape": 100,
+          "scale": 4.5
+        }
+      },
+      "bounds": {
+        "lower": 300.0,
+        "upper": 600.0
+      },
+      "source": "NHS Reference Costs 2024"
+    },
+    "standard_care_cost": {
+      "name": "Standard Care Initial Cost",
+      "description": "Initial assessment and stabilization without thrombolysis",
+      "type": "cost",
+      "base_value": 100.0,
+      "distribution": {
+        "family": "gamma",
+        "parameters": {
+          "shape": 50,
+          "scale": 2.0
+        }
+      },
+      "bounds": {
+        "lower": 50.0,
+        "upper": 150.0
+      },
+      "source": "NHS Reference Costs 2024"
+    },
+    "prob_throm_mrs_0_1": {
+      "name": "Probability mRS 0-1 with Thrombolysis",
+      "description": "Probability of functional independence (mRS 0-1) at 90 days with IV thrombolysis",
+      "type": "probability",
+      "base_value": 0.39,
+      "distribution": {
+        "family": "beta",
+        "parameters": {
+          "alpha": 156,
+          "beta": 244
+        }
+      },
+      "bounds": {
+        "lower": 0.30,
+        "upper": 0.48
+      },
+      "source": "NINDS rt-PA Study Group 1995"
+    },
+    "prob_throm_mrs_2_3": {
+      "name": "Probability mRS 2-3 with Thrombolysis",
+      "type": "probability",
+      "base_value": 0.30,
+      "distribution": {
+        "family": "beta",
+        "parameters": {
+          "alpha": 120,
+          "beta": 280
+        }
+      },
+      "bounds": {
+        "lower": 0.25,
+        "upper": 0.35
+      },
+      "source": "NINDS rt-PA Study Group 1995"
+    },
+    "prob_throm_mrs_4_5": {
+      "name": "Probability mRS 4-5 with Thrombolysis",
+      "type": "probability",
+      "base_value": 0.14,
+      "distribution": {
+        "family": "beta",
+        "parameters": {
+          "alpha": 56,
+          "beta": 344
+        }
+      },
+      "bounds": {
+        "lower": 0.10,
+        "upper": 0.18
+      },
+      "source": "NINDS rt-PA Study Group 1995"
+    },
+    "prob_throm_death": {
+      "name": "Probability Death with Thrombolysis",
+      "type": "probability",
+      "base_value": 0.17,
+      "distribution": {
+        "family": "beta",
+        "parameters": {
+          "alpha": 68,
+          "beta": 332
+        }
+      },
+      "bounds": {
+        "lower": 0.13,
+        "upper": 0.21
+      },
+      "source": "NINDS rt-PA Study Group 1995"
+    },
+    "prob_std_mrs_0_1": {
+      "name": "Probability mRS 0-1 with Standard Care",
+      "type": "probability",
+      "base_value": 0.26,
+      "distribution": {
+        "family": "beta",
+        "parameters": {
+          "alpha": 104,
+          "beta": 296
+        }
+      },
+      "bounds": {
+        "lower": 0.20,
+        "upper": 0.32
+      },
+      "source": "NINDS rt-PA Study Group 1995"
+    },
+    "prob_std_mrs_2_3": {
+      "name": "Probability mRS 2-3 with Standard Care",
+      "type": "probability",
+      "base_value": 0.32,
+      "distribution": {
+        "family": "beta",
+        "parameters": {
+          "alpha": 128,
+          "beta": 272
+        }
+      },
+      "bounds": {
+        "lower": 0.27,
+        "upper": 0.37
+      },
+      "source": "NINDS rt-PA Study Group 1995"
+    },
+    "prob_std_mrs_4_5": {
+      "name": "Probability mRS 4-5 with Standard Care",
+      "type": "probability",
+      "base_value": 0.20,
+      "distribution": {
+        "family": "beta",
+        "parameters": {
+          "alpha": 80,
+          "beta": 320
+        }
+      },
+      "bounds": {
+        "lower": 0.16,
+        "upper": 0.24
+      },
+      "source": "NINDS rt-PA Study Group 1995"
+    },
+    "prob_std_death": {
+      "name": "Probability Death with Standard Care",
+      "type": "probability",
+      "base_value": 0.22,
+      "distribution": {
+        "family": "beta",
+        "parameters": {
+          "alpha": 88,
+          "beta": 312
+        }
+      },
+      "bounds": {
+        "lower": 0.18,
+        "upper": 0.26
+      },
+      "source": "NINDS rt-PA Study Group 1995"
+    },
+    "acute_cost_mrs_0_1": {
+      "name": "Acute Care Cost mRS 0-1",
+      "type": "cost",
+      "base_value": 8000.0,
+      "distribution": {
+        "family": "gamma",
+        "parameters": {
+          "shape": 64,
+          "scale": 125
+        }
+      },
+      "source": "NHS stroke unit costs"
+    },
+    "acute_cost_mrs_2_3": {
+      "name": "Acute Care Cost mRS 2-3",
+      "type": "cost",
+      "base_value": 12000.0,
+      "distribution": {
+        "family": "gamma",
+        "parameters": {
+          "shape": 64,
+          "scale": 187.5
+        }
+      },
+      "source": "NHS stroke unit costs"
+    },
+    "acute_cost_mrs_4_5": {
+      "name": "Acute Care Cost mRS 4-5",
+      "type": "cost",
+      "base_value": 18000.0,
+      "distribution": {
+        "family": "gamma",
+        "parameters": {
+          "shape": 64,
+          "scale": 281.25
+        }
+      },
+      "source": "NHS stroke unit costs"
+    },
+    "acute_cost_death": {
+      "name": "Acute Care Cost Death",
+      "type": "cost",
+      "base_value": 10000.0,
+      "distribution": {
+        "family": "gamma",
+        "parameters": {
+          "shape": 64,
+          "scale": 156.25
+        }
+      },
+      "source": "NHS stroke unit costs"
+    },
+    "annual_cost_mrs_0_1": {
+      "name": "Annual Care Cost mRS 0-1",
+      "type": "cost",
+      "base_value": 1200.0,
+      "distribution": {
+        "family": "gamma",
+        "parameters": {
+          "shape": 36,
+          "scale": 33.33
+        }
+      },
+      "source": "Community care costs"
+    },
+    "annual_cost_mrs_2_3": {
+      "name": "Annual Care Cost mRS 2-3",
+      "type": "cost",
+      "base_value": 8500.0,
+      "distribution": {
+        "family": "gamma",
+        "parameters": {
+          "shape": 36,
+          "scale": 236.11
+        }
+      },
+      "source": "Community and social care costs"
+    },
+    "annual_cost_mrs_4_5": {
+      "name": "Annual Care Cost mRS 4-5",
+      "type": "cost",
+      "base_value": 28000.0,
+      "distribution": {
+        "family": "gamma",
+        "parameters": {
+          "shape": 36,
+          "scale": 777.78
+        }
+      },
+      "source": "Institutional care costs"
+    },
+    "utility_mrs_0_1": {
+      "name": "Utility mRS 0-1",
+      "type": "utility",
+      "base_value": 0.90,
+      "distribution": {
+        "family": "beta",
+        "parameters": {
+          "alpha": 90,
+          "beta": 10
+        }
+      },
+      "bounds": {
+        "lower": 0.80,
+        "upper": 0.95
+      },
+      "source": "EQ-5D-3L population norms"
+    },
+    "utility_mrs_2_3": {
+      "name": "Utility mRS 2-3",
+      "type": "utility",
+      "base_value": 0.55,
+      "distribution": {
+        "family": "beta",
+        "parameters": {
+          "alpha": 55,
+          "beta": 45
+        }
+      },
+      "bounds": {
+        "lower": 0.45,
+        "upper": 0.65
+      },
+      "source": "Stroke utility weights literature"
+    },
+    "utility_mrs_4_5": {
+      "name": "Utility mRS 4-5",
+      "type": "utility",
+      "base_value": 0.15,
+      "distribution": {
+        "family": "beta",
+        "parameters": {
+          "alpha": 15,
+          "beta": 85
+        }
+      },
+      "bounds": {
+        "lower": 0.05,
+        "upper": 0.25
+      },
+      "source": "Stroke utility weights literature"
+    },
+    "utility_death": {
+      "name": "Utility Death",
+      "type": "utility",
+      "base_value": 0.0,
+      "bounds": {
+        "lower": 0.0,
+        "upper": 0.0
+      },
+      "source": "Standard assumption"
+    },
+    "life_expectancy_mrs_0_1": {
+      "name": "Life Expectancy mRS 0-1",
+      "type": "duration",
+      "base_value": 12.0,
+      "distribution": {
+        "family": "gamma",
+        "parameters": {
+          "shape": 144,
+          "scale": 0.0833
+        }
+      },
+      "source": "UK life tables adjusted for stroke history"
+    },
+    "life_expectancy_mrs_2_3": {
+      "name": "Life Expectancy mRS 2-3",
+      "type": "duration",
+      "base_value": 8.0,
+      "distribution": {
+        "family": "gamma",
+        "parameters": {
+          "shape": 64,
+          "scale": 0.125
+        }
+      },
+      "source": "UK life tables adjusted for disability"
+    },
+    "life_expectancy_mrs_4_5": {
+      "name": "Life Expectancy mRS 4-5",
+      "type": "duration",
+      "base_value": 4.0,
+      "distribution": {
+        "family": "gamma",
+        "parameters": {
+          "shape": 16,
+          "scale": 0.25
+        }
+      },
+      "source": "UK life tables adjusted for severe disability"
+    },
+    "life_expectancy_death": {
+      "name": "Life Expectancy Death",
+      "type": "duration",
+      "base_value": 0.0,
+      "source": "N/A"
+    },
+    "time_horizon": {
+      "name": "Time Horizon",
+      "description": "Analysis time horizon in years",
+      "type": "duration",
+      "base_value": 10.0,
+      "bounds": {
+        "lower": 1.0,
+        "upper": 20.0
+      },
+      "source": "Analysis assumption"
+    }
+  },
+  "analysis_settings": {
+    "base_case": {
+      "time_horizon": 10,
+      "time_horizon_units": "years",
+      "discount_rate_costs": 0.035,
+      "discount_rate_outcomes": 0.035,
+      "perspective": "healthcare_system"
+    },
+    "sensitivity_analyses": [
+      {
+        "analysis_id": "sa_discount",
+        "name": "Sensitivity to Discount Rate",
+        "type": "one_way",
+        "parameter": "discount_rate_costs",
+        "values": [0.0, 0.015, 0.035, 0.05, 0.07]
+      },
+      {
+        "analysis_id": "sa_time_horizon",
+        "name": "Sensitivity to Time Horizon",
+        "type": "one_way",
+        "parameter": "time_horizon",
+        "values": [5, 10, 15, 20]
+      },
+      {
+        "analysis_id": "psa_main",
+        "name": "Probabilistic Sensitivity Analysis",
+        "type": "probabilistic",
+        "iterations": 10000,
+        "random_seed": 42,
+        "parameters": "all_with_distributions"
+      }
+    ]
+  }
+}
