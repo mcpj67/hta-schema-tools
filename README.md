@@ -274,3 +274,20 @@ Advanced features and commercial services are proprietary.
 **For the specification:** See [hta-schema](https://github.com/[username]/hta-schema)  
 **For commercial inquiries:** [contact to be added]  
 **For collaboration:** Open an issue or discussion
+
+## Schema Support
+
+- **v0.1.1**: Full support including expression language validation
+- **v0.1.0**: Full support (backward compatible)
+
+### Expression Language (v0.1.1+)
+
+The enhanced validator supports complex expressions:
+```python
+# Validate models with expressions
+from validator.expression_validator import validate_model_expressions
+
+is_valid, errors = validate_model_expressions(model)
+```
+
+See [Implementation Summary](docs/IMPLEMENTATION_SUMMARY.md) for details.

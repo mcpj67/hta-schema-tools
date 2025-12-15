@@ -124,3 +124,27 @@ Adding PSA computation and sensitivity analysis visualization in v1.1
 ---
 
 For the schema specification, see [hta-schema repository](https://github.com/[username]/hta-schema)
+
+# Changelog
+
+## [1.1.0] - 2024-12-15
+
+### Added
+- Expression validator for v0.1.1 schema
+- Example stroke model with complex lifetime cost calculations
+- Implementation summary and migration guide
+- Support for validating expressions with parameter references
+- Syntax, semantic, and function validation
+
+### Changed
+- Enhanced validation capabilities for v0.1.1 models
+
+### Backward Compatibility
+- Continues to support v0.1.0 models
+- No breaking changes to existing functionality
+
+## [1.0.0] - 2024-12-12
+
+### Added
+- Initial release with web viewer and Python validator
+- Support for v0.1.0 schema
